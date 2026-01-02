@@ -1,0 +1,124 @@
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: transparent;
+}
+
+.top-bar {
+  position: sticky;
+  top: 20px;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.top-bar-inner {
+  width: 600px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  pointer-events: auto;
+}
+
+
+.search-box {
+  position: relative;
+  display: flex;
+  gap: 10px;
+}
+
+.input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+}
+
+.input:focus {
+  border-color: #6366f1;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.3);
+}
+
+.button {
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  background: #6366f1;
+  color: white;
+  font-weight: 600;
+}
+
+.button:hover {
+  background: #4f46e5;
+}
+
+.country-header {
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.autocomplete-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 0 0 12px 12px;
+  border: 1px solid #d1d5db;
+  border-top: none;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 20;
+}
+
+.autocomplete-suggestions div {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.autocomplete-suggestions div:hover,
+.autocomplete-suggestions div.active {
+  background: #eef2ff;
+}
+
+
+.results-panel {
+  margin-top: 60vh;
+  background: white;
+  border-radius: 32px 32px 0 0;
+  padding: 40px 20px 80px;
+  box-shadow: 0 -12px 40px rgba(0,0,0,0.15);
+}
+
+.card {
+  max-width: 600px;
+  margin: 0 auto 20px;
+  background: #fafafa;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.flag {
+  width: 180px;
+  border-radius: 12px;
+  margin-top: 10px;
+}
+
+.loading {
+  text-align: center;
+  color: #6b7280;
+}
+
+.error {
+  text-align: center;
+  color: #ef4444;
+}
