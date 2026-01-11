@@ -3,11 +3,8 @@ import "./App.css";
 import Globe from "./components/globe.jsx";
 import { Canvas } from "@react-three/fiber";
 import StarsBG from "./components/stars.jsx";
-
-import { mockTravelData } from "./mockData";
 import { mockCountries } from "./mockCountries";
 
-const USE_MOCK_DATA = true;
 
 function App() {
   const [country, setCountry] = useState("");
@@ -66,21 +63,73 @@ function App() {
     }
   };
 
-  const fetchData = async () => {
-    if (!country.trim()) return;
+  const fetchData = async (overrideCountry) => {
+    const query = overrideCountry ?? country;
+    if (!query.trim()) return;
 
     setLoading(true);
     setError(null);
     setSuggestions([]);
+    setData(null);
 
     try {
-      if (USE_MOCK_DATA) {
-        await new Promise((r) => setTimeout(r, 600));
-        setData(mockTravelData);
-        return;
+      const response = await fetch(`/country?name=${encodeURIComponent(query)}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error. status: ${response.status}`);
       }
-    } catch {
-      setError("Error fetching data.");
+
+     const raw = await response.json();
+
+    const adaptedData = {
+      countryInfo: {
+        commonName: raw.country.commonName,
+        officialName: raw.country.officialName,
+        currencyName: raw.country.currencyName,
+        currencySymbol: raw.country.currencySymbol,
+        flagPng: raw.country.flagPng,
+        flagSvg: raw.country.flagSvg,
+        population: raw.country.population,
+        timezone: raw.country.timezone,
+        capital: raw.country.capital,
+        capitalLat: raw.country.capitalLat,
+        capitalLng: raw.country.capitalLng,
+      },
+
+      weatherInfo: {
+        temp: raw.weather.temp,
+        feelsLike: raw.weather.feelsLike,
+        humidity: raw.weather.humidity,
+        windSpeed: raw.weather.windSpeed,
+        weatherMain: raw.weather.weatherMain,
+        weatherDescription: raw.weather.weatherDescription,
+        weatherIcon: raw.weather.weatherIcon,
+      },
+
+      timeInfo: {
+        dateTimeString: raw.time.dateTimeString,
+        utcOffset: raw.time.utcOffset,
+      },
+
+      travelAdvisory: {
+        description: raw.wikipedia.description,
+        imageUrl: raw.wikipedia.imageUrl,
+      },
+
+      travelInfo: {
+        name: raw.geo.name,
+        formattedAddress: raw.geo.formattedAddress,
+        openingHours: raw.geo.openingHours,
+        website: raw.geo.website,
+        description: raw.wikipedia.description,
+        wikiImage: raw.wikipedia.imageUrl,
+      },
+    };
+       
+      setData(adaptedData);
+    } catch (err){
+      console.error(err);
+      setError(err.message || "Error fetching data.");
     } finally {
       setLoading(false);
     }
@@ -102,7 +151,6 @@ function App() {
         />
       </Canvas>
 
-      {/* ===== TOP BAR ===== */}
       <div className="top-bar">
         <div className="top-bar-inner">
           {!data ? (
@@ -139,7 +187,7 @@ function App() {
             </div>
           ) : (
             <div className="country-header">
-              🌍 {data.countryInfo.commonName}
+              {data.countryInfo.commonName}
             </div>
           )}
         </div>
@@ -159,15 +207,65 @@ function App() {
 
           <div className="card">
             <h3>Weather</h3>
-            <p>{data.weatherInfo.weatherDescription}</p>
-            <p>{(data.weatherInfo.temp - 273.15).toFixed(1)}°C</p>
+            <p><strong>Condition:</strong> {data.weatherInfo.weatherDescription}</p>
+            <p><strong>Temperature:</strong> {(data.weatherInfo.temp - 273.15).toFixed(1)}°C</p>
+            <p><strong>Feels like:</strong> {(data.weatherInfo.feelsLike - 273.15).toFixed(1)}°C</p>
+            <p><strong>Humidity:</strong> {data.weatherInfo.humidity}%</p>
+            <p><strong>Wind speed:</strong> {data.weatherInfo.windSpeed} m/s</p>
           </div>
+
 
           <div className="card">
             <h3>Local Time</h3>
             <p>{data.timeInfo.dateTimeString}</p>
           </div>
+
+          <div className="card">
+            <h3>Country Facts</h3>
+            <p><strong>Official name:</strong> {data.countryInfo.officialName}</p>
+            <p>
+              <strong>Currency:</strong>{" "}
+              {data.countryInfo.currencyName} ({data.countryInfo.currencySymbol})
+            </p>
+            <p><strong>Timezone:</strong> {data.countryInfo.timezone}</p>
+          </div>
+
+          <div className="card">
+            <h3>About {data.countryInfo.commonName}</h3>
+
+            {data.travelAdvisory.imageUrl && (
+              <img
+                src={data.travelAdvisory.imageUrl}
+                alt={`${data.countryInfo.commonName} flag`}
+                style={{ width: "100%", borderRadius: "8px", marginBottom: "10px" }}
+              />
+            )}
+
+            <p style={{ lineHeight: "1.5" }}>
+              {data.travelAdvisory.description}
+            </p>
+          </div>
+
+          <div className="card">
+            <h3>Point of Interest</h3>
+            <p><strong>Name:</strong> {data.travelInfo.name}</p>
+            <p><strong>Address:</strong> {data.travelInfo.formattedAddress}</p>
+
+            {data.travelInfo.openingHours && (
+              <p><strong>Opening hours:</strong> {data.travelInfo.openingHours}</p>
+            )}
+
+            {data.travelInfo.website && (
+              <p>
+                <a href={data.travelInfo.website} target="_blank" rel="noreferrer">
+                  Visit website
+                </a>
+              </p>
+            )}
+          </div>
+
         </div>
+
       )}
     </>
   );
