@@ -67,11 +67,8 @@ function App() {
     const query = overrideCountry ?? country;
     if (!query.trim()) return;
 
-    const exists = mockCountries.some((c) =>
-      c.toLowerCase() === query.toLowerCase()
-    );
-    if (!exists) {
-      setError("Country not found. Please check the spelling.");
+    if (!mockCountries.some(c => c.toLowerCase() === query.toLowerCase())) {
+      setError("Country not found.");
       setData(null);
       setSuggestions([]);
       return;
@@ -88,53 +85,60 @@ function App() {
       if (!response.ok) {
         throw new Error(`HTTP error. status: ${response.status}`);
       }
+    
+      let raw;
+      try {
+        raw = await response.json();
+      } catch {
+        setError("Could not get response from server.");
+        setLoading(false);
+        return;
+      }
 
-     const raw = await response.json();
+      const adaptedData = {
+        countryInfo: {
+          commonName: raw.country.commonName,
+          officialName: raw.country.officialName,
+          currencyName: raw.country.currencyName,
+          currencySymbol: raw.country.currencySymbol,
+          flagPng: raw.country.flagPng,
+          flagSvg: raw.country.flagSvg,
+          population: raw.country.population,
+          timezone: raw.country.timezone,
+          capital: raw.country.capital,
+          capitalLat: raw.country.capitalLat,
+          capitalLng: raw.country.capitalLng,
+        },
 
-    const adaptedData = {
-      countryInfo: {
-        commonName: raw.country.commonName,
-        officialName: raw.country.officialName,
-        currencyName: raw.country.currencyName,
-        currencySymbol: raw.country.currencySymbol,
-        flagPng: raw.country.flagPng,
-        flagSvg: raw.country.flagSvg,
-        population: raw.country.population,
-        timezone: raw.country.timezone,
-        capital: raw.country.capital,
-        capitalLat: raw.country.capitalLat,
-        capitalLng: raw.country.capitalLng,
-      },
+        weatherInfo: {
+          temp: raw.weather.temp,
+          feelsLike: raw.weather.feelsLike,
+          humidity: raw.weather.humidity,
+          windSpeed: raw.weather.windSpeed,
+          weatherMain: raw.weather.weatherMain,
+          weatherDescription: raw.weather.weatherDescription,
+          weatherIcon: raw.weather.weatherIcon,
+        },
 
-      weatherInfo: {
-        temp: raw.weather.temp,
-        feelsLike: raw.weather.feelsLike,
-        humidity: raw.weather.humidity,
-        windSpeed: raw.weather.windSpeed,
-        weatherMain: raw.weather.weatherMain,
-        weatherDescription: raw.weather.weatherDescription,
-        weatherIcon: raw.weather.weatherIcon,
-      },
+        timeInfo: {
+          dateTimeString: raw.time.dateTimeString,
+          utcOffset: raw.time.utcOffset,
+        },
 
-      timeInfo: {
-        dateTimeString: raw.time.dateTimeString,
-        utcOffset: raw.time.utcOffset,
-      },
+        travelAdvisory: {
+          description: raw.wikipedia.description,
+          imageUrl: raw.wikipedia.imageUrl,
+        },
 
-      travelAdvisory: {
-        description: raw.wikipedia.description,
-        imageUrl: raw.wikipedia.imageUrl,
-      },
-
-      travelInfo: {
-        name: raw.geo.name,
-        formattedAddress: raw.geo.formattedAddress,
-        openingHours: raw.geo.openingHours,
-        website: raw.geo.website,
-        description: raw.wikipedia.description,
-        wikiImage: raw.wikipedia.imageUrl,
-      },
-    };
+        travelInfo: {
+          name: raw.geo.name,
+          formattedAddress: raw.geo.formattedAddress,
+          openingHours: raw.geo.openingHours,
+          website: raw.geo.website,
+          description: raw.wikipedia.description,
+          wikiImage: raw.wikipedia.imageUrl,
+        },
+      };
        
       setData(adaptedData);
     } catch (err){
