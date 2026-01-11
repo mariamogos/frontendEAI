@@ -67,6 +67,16 @@ function App() {
     const query = overrideCountry ?? country;
     if (!query.trim()) return;
 
+    const exists = mockCountries.some((c) =>
+      c.toLowerCase() === query.toLowerCase()
+    );
+    if (!exists) {
+      setError("Country not found. Please check the spelling.");
+      setData(null);
+      setSuggestions([]);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setSuggestions([]);
